@@ -1,0 +1,47 @@
+datamodule:
+  _target_: cocos.data.DefectsDataModule
+  data_dir: dataset
+  batch_size: 5
+  max_length: 800
+  num_processes: 8
+model:
+  _target_: cocos.model.EncoderForSequenceClassification
+  encoder:
+    _target_: transformers.T5EncoderModel.from_pretrained
+    _args_: [
+      #        "checkpoints/cocos-base"  # can update path here
+    ]
+  num_classes: 2
+  learning_rate: 5.22350068805056e-05
+  warmup_percentage: 0.1
+  pooler_dim: null
+  pooler_dropout: null
+  use_eos_instead_of_cls: false
+  average: micro
+  measure_binary: false
+logger:
+  _target_: pytorch_lightning.loggers.wandb.WandbLogger
+  project: coling-defects
+callbacks:
+  learning_rate:
+    _target_: pytorch_lightning.callbacks.LearningRateMonitor
+  checkpoint:
+    _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: valid/accuracy
+    save_top_k: 1
+    mode: max
+    verbose: true
+    dirpath: checkpoints
+    auto_insert_metric_name: false
+    filename: '{epoch}-{val_loss:.2f}-{valid/accuracy:.4f}'
+  output_saver:
+    _target_: cocos.callbacks.OutputSaver
+    valid_filename: valid_predictions.jsonl
+    test_filename: test_predictions.jsonl
+    keep_last: 5
+trainer:
+  _target_: pytorch_lightning.Trainer
+  gpus: 1
+  max_epochs: 4
+  accumulate_grad_batches: 1
+  val_check_interval: 0.5

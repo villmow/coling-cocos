@@ -1,0 +1,4 @@
+from cocos.data.defects_datamodule import DefectsDataModule
+from cocos.data.poj104_datamodule import POJ104DataModule
+from cocos.data.codedatapipe_datamodule import CodeDatapipeDataModule
+from cocos.data.cocos_datamodule import CCSZSDataModule

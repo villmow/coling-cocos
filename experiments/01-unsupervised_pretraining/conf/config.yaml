@@ -1,0 +1,58 @@
+defaults:
+  - callbacks: default
+  - datapipe: retrieval
+  - model: retriever
+  - trainer: ddp
+  - _self_
+
+common:
+  seed: 42
+  gpus: 1
+
+  max_tokens: 512
+  num_tokens_in_batch: 7000
+  accumulate_grad_batches: 4
+
+  min_steps: 500000
+  max_steps: 600000
+
+  num_train_workers: 6
+  num_valid_workers: 4
+
+  # training will continue from checkpoint in this experiment and logging will continue
+  resume_experiment: null
+
+  # start new experiment from this checkpoint
+  checkpoint_path: null
+
+dataset:
+  seed: ${common.seed}
+  prefetch_factor: 4
+  train:
+    directory: "/data/dok/johannes/data/github_dataset_10k_bin_hashes"
+#    directory: "../../dataset/pretraining-dataset-mini"
+    num_workers: ${common.num_train_workers}
+    num_tokens_in_batch: ${common.num_tokens_in_batch}
+  valid:
+    directory: "/data/dok/johannes/data/github_dataset_10k_bin_hashes"
+#    directory: "../../dataset/pretraining-dataset-mini"
+    num_workers: ${common.num_valid_workers}
+    num_tokens_in_batch: ${common.num_tokens_in_batch}
+  test:
+    directory: "/data/dok/johannes/data/github_dataset_10k_bin_hashes"
+#    directory: "../../dataset/pretraining-dataset-mini"
+    num_workers: ${common.num_valid_workers}
+    num_tokens_in_batch: ${common.num_tokens_in_batch}
+
+logger:
+  wandb:
+    _target_: pytorch_lightning.loggers.wandb.WandbLogger
+    project: "cocos-retriever"
+
+model:
+  pretrained_encoder_checkpoint: "../../checkpoints/cocos-base"
+
+trainer:
+  reload_dataloaders_every_n_epochs: 1
+  val_check_interval: 30000
+  limit_val_batches: 1000

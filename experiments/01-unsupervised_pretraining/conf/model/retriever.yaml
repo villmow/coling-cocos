@@ -1,0 +1,28 @@
+defaults:
+  - _self_
+  - loss: infonce
+
+_target_: cocos.model.DualRetriever
+share_encoders: True
+model_cfg:
+  d_model: 768
+  d_kv: 64
+  d_ff: 2048
+  num_layers: 12
+  num_heads: 12
+  relative_attention_num_buckets: 32
+  dropout_rate: 0.1
+  layer_norm_epsilon: 1e-06
+  initializer_factor: 1.0
+  feed_forward_proj: "gated-gelu"
+  tie_word_embeddings: False
+  use_cache: True
+  is_encoder_decoder: True
+optimizer_cfg:
+  weight_decay: 0.0
+  learning_rate: 5e-5
+  adam_epsilon: 1e-8
+  warmup_steps: 4000
+pretrained_encoder_checkpoint: null
+query_projector_cfg: null
+key_projector_cfg: null

@@ -1,0 +1,55 @@
+datamodule:
+  _target_: cocos.data.POJ104DataModule
+  data_dir: ./dataset
+  batch_size: 21
+  max_length: 800
+  num_processes: 16
+  n_samples_of_class_per_batch: null
+model:
+  _target_: cocos.model.EncoderForRetrieval
+  encoder:
+    _target_: transformers.T5EncoderModel.from_pretrained
+    _args_: [
+#        "checkpoints/cocos-before-finetuning" # can update path here
+    ]
+  loss:
+    _target_: pytorch_metric_learning.losses.NTXentLoss
+    distance:
+      _target_: pytorch_metric_learning.distances.CosineSimilarity
+    reducer: null
+    embedding_regularizer: null
+    temperature: 0.1
+  miner: null
+  learning_rate: 2.0905674977911143e-05
+  warmup_percentage: 0.1
+  use_eos_instead_of_cls: false
+logger:
+  _target_: pytorch_lightning.loggers.wandb.WandbLogger
+  project: coling-clone-detection
+callbacks:
+  learning_rate:
+    _target_: pytorch_lightning.callbacks.LearningRateMonitor
+  checkpoint:
+    _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: valid/MAP
+    save_top_k: 1
+    mode: max
+    verbose: true
+    dirpath: checkpoints
+    auto_insert_metric_name: false
+    filename: '{epoch}-{val_loss:.2f}-{valid/MAP:.4f}'
+  search:
+    _target_: cocos.callbacks.RetrievalMetricsCallback
+    valid_filepath: valid_predictions.jsonl
+    test_filepath: test_predictions.jsonl
+    normalize_embeddings: true
+    compute_for_train_set: false
+trainer:
+  _target_: pytorch_lightning.Trainer
+  gpus: 1
+  max_epochs: 9
+  accumulate_grad_batches: 1
+  val_check_interval: 0.5
+hydra:
+  run:
+    dir: ./outputs/${logger.project}/${now:%Y-%m-%d}/${now:%H-%M-%S}

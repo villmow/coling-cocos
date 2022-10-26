@@ -1,0 +1,1 @@
+Place checkpoints in this directory.

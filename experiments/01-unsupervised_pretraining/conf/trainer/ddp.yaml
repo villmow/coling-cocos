@@ -1,0 +1,24 @@
+_target_: pytorch_lightning.Trainer
+
+devices: ${common.gpus}
+accelerator: "gpu"
+strategy:
+  _target_: pytorch_lightning.plugins.DDPPlugin
+  find_unused_parameters: False
+
+accumulate_grad_batches: ${common.accumulate_grad_batches}  # increase batch size by factor
+
+min_steps: ${common.min_steps}
+max_steps: ${common.max_steps}
+
+val_check_interval: 40000  # validate every n batches
+limit_val_batches: 1000
+
+precision: bf16
+min_epochs: 0  # disable epochs
+max_epochs: -1
+num_sanity_val_steps: 2
+fast_dev_run: False
+log_every_n_steps: 100
+track_grad_norm: -1
+gradient_clip_val: 0  # dont clip

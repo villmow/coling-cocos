@@ -1,0 +1,45 @@
+sharding:
+  _target_: cocos.datapipes.distributed.ShardedDataset
+truncate:
+  _target_: cocos.datapipes.Truncater
+  seed: ${common.seed}
+  cfg:
+    max_folds: 100
+    min_subtree_size: 150
+    max_subtree_size: 800
+    max_tree_size: 800
+    fold_smaller_samples: True
+    smaller_subtrees_max_tree_size_percentage: 0.7
+    smaller_subtrees_min_subtree_size_percentage: 0.2
+    distinct_fold_tokens: False
+    join_whitespace: True
+    only_join_siblings: False
+    sample_mode: "descendants"
+mask:
+  _target_: cocos.datapipes.TokenSpanMasker
+  seed: ${common.seed}
+  cfg:
+    masked_tokens_percentage: null
+    masked_approximate_num_tokens: null
+    masked_poisson_mean: null
+    masked_poisson_percentage: null
+    masked_normal_dist: [150, 90]
+prepend_lang_id:
+  _target_: cocos.datapipes.LanguageIdAdder
+  prepend: True
+filter_length:
+  _target_: torch.utils.data.datapipes.iter.Filter
+  filter_fn:
+      _target_: cocos.datapipes.CodePairFilter
+      max_source_size: ${common.max_tokens}
+      max_target_size: ${common.max_tokens}
+batch:
+  _target_: cocos.datapipes.LanguageBatcher
+  max_tokens_in_batch: ${common.num_tokens_in_batch}
+  num_buckets: 10
+  max_sequence_length: ${common.max_tokens}
+  collate_fn:
+    _target_: cocos.datapipes.CodePairsCollater
+    left_pad_source: False
+    left_pad_target: False
+    input_feeding: False

@@ -1,0 +1,7 @@
+search_pairs:
+  _target_: cocos.callbacks.SearchPairsCallback
+  max_samples: 100000
+  print_top_k_results: 10
+  split_n: 500
+  log_directory: searches
+  distance: "cosine"
